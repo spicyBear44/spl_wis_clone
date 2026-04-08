@@ -35,7 +35,7 @@ export default function AuthForm({ mode }) {
 
   return (
     <form className="auth-card" onSubmit={handleSubmit}>
-      <h2>{isSignup ? "Create account" : "Login"}</h2>
+      <h2>{isSignup ? "Create An Account" : "Welcome Back!"}</h2>
       {error ? <p className="form-error">{error}</p> : null}
       {isSignup ? (
         <input
