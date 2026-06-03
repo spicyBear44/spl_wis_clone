@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const userRoutes = require("./routes/userRoutes");
+const noteRoutes = require("./routes/noteRoutes");
 const { requireAuth } = require("./middleware/auth");
 
 dotenv.config();
@@ -29,7 +30,13 @@ app.use(
     credentials: true
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
+
+app.use("/api", (req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.set("Pragma", "no-cache");
+  next();
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true });
@@ -39,9 +46,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", requireAuth, userRoutes);
 app.use("/api/dashboard", requireAuth, dashboardRoutes);
 app.use("/api/groups", requireAuth, groupRoutes);
+app.use("/api/notes", requireAuth, noteRoutes);
 
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
+  if (error.type === "entity.too.large") {
+    return res.status(413).json({ message: "Profile photo is too large." });
+  }
   return res.status(500).json({ message: "Unexpected server error.", error: error.message });
 });
 

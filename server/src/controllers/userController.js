@@ -1,5 +1,20 @@
 const User = require("../models/User");
 
+function serializePerson(user, extra = {}) {
+  if (!user) return null;
+
+  const profilePhoto = user.profilePhoto || "";
+
+  return {
+    id: user._id,
+    name: user.name,
+    username: user.username,
+    profilePhoto,
+    profilePicture: profilePhoto,
+    ...extra
+  };
+}
+
 async function searchUsers(req, res) {
   try {
     const query = (req.query.query || "").trim().toLowerCase();
@@ -15,15 +30,12 @@ async function searchUsers(req, res) {
       _id: { $ne: req.user._id },
       username: { $regex: `^${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, $options: "i" }
     })
-      .select("name username")
+      .select("name username profilePhoto")
       .sort({ username: 1 })
       .limit(8);
 
     return res.json(
-      users.map((user) => ({
-        id: user._id,
-        name: user.name,
-        username: user.username,
+      users.map((user) => serializePerson(user, {
         status: currentUser.friends.some((id) => id.toString() === user._id.toString())
           ? "friends"
           : currentUser.outgoingFriendRequests.some((id) => id.toString() === user._id.toString())
@@ -41,29 +53,52 @@ async function searchUsers(req, res) {
 async function listFriends(req, res) {
   try {
     const user = await User.findById(req.user._id)
-      .populate("friends", "name username")
-      .populate("incomingFriendRequests", "name username")
-      .populate("outgoingFriendRequests", "name username");
+      .populate("incomingFriendRequests", "name username profilePhoto")
+      .populate("outgoingFriendRequests", "name username profilePhoto")
+      .populate("friends", "name username profilePhoto");
 
     return res.json({
-      friends: (user?.friends || []).map((friend) => ({
-        id: friend._id,
-        name: friend.name,
-        username: friend.username
-      })),
-      incomingRequests: (user?.incomingFriendRequests || []).map((friend) => ({
-        id: friend._id,
-        name: friend.name,
-        username: friend.username
-      })),
-      outgoingRequests: (user?.outgoingFriendRequests || []).map((friend) => ({
-        id: friend._id,
-        name: friend.name,
-        username: friend.username
-      }))
+      friends: (user?.friends || []).map((friend) => serializePerson(friend)).filter(Boolean),
+      incomingRequests: (user?.incomingFriendRequests || []).map((friend) => serializePerson(friend)).filter(Boolean),
+      outgoingRequests: (user?.outgoingFriendRequests || []).map((friend) => serializePerson(friend)).filter(Boolean)
     });
   } catch (error) {
     return res.status(500).json({ message: "Could not load friends.", error: error.message });
+  }
+}
+
+async function updateProfilePhoto(req, res) {
+  try {
+    const { profilePhoto } = req.body;
+
+    if (typeof profilePhoto !== "string") {
+      return res.status(400).json({ message: "Profile photo is required." });
+    }
+    if (profilePhoto && !profilePhoto.startsWith("data:image/")) {
+      return res.status(400).json({ message: "Profile photo must be an image." });
+    }
+    if (profilePhoto.length > 600000) {
+      return res.status(400).json({ message: "Profile photo is too large." });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePhoto },
+      { new: true, runValidators: true }
+    ).select("name username email profilePhoto");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.json({
+      user: {
+        ...serializePerson(user),
+        email: user.email
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Could not update profile photo.", error: error.message });
   }
 }
 
@@ -231,5 +266,6 @@ module.exports = {
   addFriend,
   acceptFriendRequest,
   rejectFriendRequest,
-  removeFriend
+  removeFriend,
+  updateProfilePhoto
 };

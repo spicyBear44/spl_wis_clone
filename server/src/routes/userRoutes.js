@@ -5,13 +5,15 @@ const {
   addFriend,
   acceptFriendRequest,
   rejectFriendRequest,
-  removeFriend
+  removeFriend,
+  updateProfilePhoto
 } = require("../controllers/userController");
 
 const router = express.Router();
 
 router.get("/", searchUsers);
 router.get("/friends", listFriends);
+router.put("/profile-photo", updateProfilePhoto);
 router.post("/friends", addFriend);
 router.post("/friends/accept", acceptFriendRequest);
 router.post("/friends/reject", rejectFriendRequest);

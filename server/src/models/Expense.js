@@ -33,6 +33,21 @@ const expenseSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    menuAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    taxAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    tipAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     paidBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -42,6 +57,11 @@ const expenseSchema = new mongoose.Schema(
     category: {
       type: String,
       default: "General"
+    },
+    splitType: {
+      type: String,
+      enum: ["equal", "exact"],
+      default: "equal"
     },
     expenseDate: {
       type: Date,

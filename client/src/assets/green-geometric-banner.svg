@@ -1,0 +1,36 @@
+<svg width="2048" height="340" viewBox="0 0 2048 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="2048" height="340" fill="white"/>
+  <path d="M0 244L224 340H0V244Z" fill="#EEF7E9"/>
+  <path d="M0 177L438 340H0V177Z" fill="#E6F2E0"/>
+  <path d="M212 340L547 260L724 286L1048 340H212Z" fill="#DDEED6"/>
+  <path d="M724 286L1048 226L1278 340H884L724 286Z" fill="#6AC42B"/>
+  <path d="M1048 226L1288 200L1418 340H1278L1048 226Z" fill="#52B83B"/>
+  <path d="M1288 200L1562 210L1418 340L1288 200Z" fill="#32A74A"/>
+  <path d="M1562 210L1825 238L1660 340L1418 340L1562 210Z" fill="#008C47"/>
+  <path d="M1825 238L2048 146V340H1660L1825 238Z" fill="#00663D"/>
+  <path d="M1304 200L1540 60L1562 210L1304 200Z" fill="#C8F56E"/>
+  <path d="M1540 60L1772 102L1562 210L1540 60Z" fill="#76D24F"/>
+  <path d="M1772 102L1825 238L1562 210L1772 102Z" fill="#00994B"/>
+  <path d="M1772 102L2048 150L1825 238L1772 102Z" fill="#2BAE5B"/>
+  <path d="M1540 60L1674 0L1772 102L1540 60Z" fill="#AEED5D"/>
+  <path d="M1674 0L1908 42L1772 102L1674 0Z" fill="#DDF6C9"/>
+  <path d="M1908 42L2048 0V150L1772 102L1908 42Z" fill="#F4FAF0"/>
+  <path d="M0 177L224 272L548 260L724 286L1048 226L1288 200L1540 60L1674 0L1908 42L2048 0" stroke="#111" stroke-width="2" stroke-opacity="0.8"/>
+  <path d="M224 272L212 340" stroke="#111" stroke-width="1.4" stroke-opacity="0.35"/>
+  <path d="M548 260L724 286" stroke="#111" stroke-width="1.4" stroke-opacity="0.55"/>
+  <path d="M1048 226L884 340" stroke="#111" stroke-width="1.4" stroke-opacity="0.55"/>
+  <path d="M1288 200L1278 340" stroke="#111" stroke-width="1.4" stroke-opacity="0.65"/>
+  <path d="M1304 200L1418 340" stroke="#111" stroke-width="1.8" stroke-opacity="0.75"/>
+  <path d="M1540 60L1562 210L1418 340" stroke="#111" stroke-width="1.8" stroke-opacity="0.75"/>
+  <path d="M1674 0L1562 210L1825 238" stroke="#111" stroke-width="1.8" stroke-opacity="0.75"/>
+  <path d="M1772 102L1825 238L2048 146" stroke="#111" stroke-width="1.8" stroke-opacity="0.75"/>
+  <path d="M1908 42L2048 150" stroke="#111" stroke-width="1.4" stroke-opacity="0.35"/>
+  <path d="M0 340H2048V214C1875 212 1742 188 1588 188C1262 188 991 288 692 300C438 310 194 270 0 244V340Z" fill="url(#softGreen)" opacity="0.35"/>
+  <defs>
+    <linearGradient id="softGreen" x1="2048" y1="199" x2="12" y2="336" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00894A"/>
+      <stop offset="0.48" stop-color="#6BCB2F"/>
+      <stop offset="1" stop-color="#F8FCF5"/>
+    </linearGradient>
+  </defs>
+</svg>

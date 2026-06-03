@@ -1,4 +1,4 @@
-# WiselySplit That Benjamins
+# WiselySplit Those Benjamins
 
 A Splitwise-style full-stack expense sharing app scaffold built with:
 

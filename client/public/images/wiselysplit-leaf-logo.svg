@@ -1,0 +1,23 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M61.5 9C35 29.5 21.5 52.8 21.5 78.2C21.5 104.3 41.2 119.6 57.2 123.2C59.8 123.8 61.5 121.8 61.5 119.5V9Z" fill="url(#leftLeaf)"/>
+  <path d="M66.5 9C93 29.5 106.5 52.8 106.5 78.2C106.5 104.3 86.8 119.6 70.8 123.2C68.2 123.8 66.5 121.8 66.5 119.5V9Z" fill="url(#rightLeaf)"/>
+  <path d="M61.5 9C35 29.5 21.5 52.8 21.5 78.2C21.5 104.3 41.2 119.6 57.2 123.2C59.8 123.8 61.5 121.8 61.5 119.5V9Z" stroke="#1f6f27" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M66.5 9C93 29.5 106.5 52.8 106.5 78.2C106.5 104.3 86.8 119.6 70.8 123.2C68.2 123.8 66.5 121.8 66.5 119.5V9Z" stroke="#1f6f27" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M51 36C56 50 60.5 60 61.5 75" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M42 50C48 64 58 76 61.5 92" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M35 72C43 84 55 94 61.5 111" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M77 36C72 50 67.5 60 66.5 75" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M86 50C80 64 70 76 66.5 92" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M93 72C85 84 73 94 66.5 111" stroke="#2a7f2d" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M64 8V123" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="leftLeaf" x1="31" y1="16" x2="66" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B7F238"/>
+      <stop offset="1" stop-color="#279632"/>
+    </linearGradient>
+    <linearGradient id="rightLeaf" x1="97" y1="16" x2="62" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B7F238"/>
+      <stop offset="1" stop-color="#279632"/>
+    </linearGradient>
+  </defs>
+</svg>

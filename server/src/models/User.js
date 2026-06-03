@@ -14,6 +14,19 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true
     },
+    email: {
+      type: String,
+      required() {
+        return this.isNew;
+      },
+      lowercase: true,
+      trim: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address."]
+    },
+    profilePhoto: {
+      type: String,
+      default: ""
+    },
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -35,9 +48,24 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true
+    },
+    resetPasswordToken: {
+      type: String,
+      default: ""
+    },
+    resetPasswordExpires: {
+      type: Date
     }
   },
   { timestamps: true }
+);
+
+userSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { email: { $type: "string" } }
+  }
 );
 
 module.exports = mongoose.model("User", userSchema);

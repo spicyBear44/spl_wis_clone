@@ -5,7 +5,8 @@ function signToken(user) {
     {
       sub: user._id.toString(),
       username: user.username,
-      name: user.name
+      name: user.name,
+      email: user.email
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }

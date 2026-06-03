@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
     const rawUser = localStorage.getItem("sw_user");
     return rawUser ? JSON.parse(rawUser) : null;
   });
+  const [authChecking, setAuthChecking] = useState(Boolean(localStorage.getItem("sw_token")));
 
   useEffect(() => {
     if (token) {
@@ -26,8 +27,57 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
+  async function verifySession() {
+    const storedToken = localStorage.getItem("sw_token");
+
+    if (!storedToken) {
+      setToken(null);
+      setUser(null);
+      setAuthChecking(false);
+      return null;
+    }
+
+    setAuthChecking(true);
+    try {
+      const response = await authApi.me();
+      setToken(storedToken);
+      setUser(response.user);
+      return response.user;
+    } catch (error) {
+      setToken(null);
+      setUser(null);
+      return null;
+    } finally {
+      setAuthChecking(false);
+    }
+  }
+
+  useEffect(() => {
+    verifySession();
+
+    function handlePageShow(event) {
+      if (event.persisted || localStorage.getItem("sw_token")) {
+        verifySession();
+      }
+    }
+
+    function handleStorage(event) {
+      if (event.key === "sw_token" || event.key === "sw_user") {
+        verifySession();
+      }
+    }
+
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
   const value = useMemo(
     () => ({
+      authChecking,
       token,
       user,
       async login(credentials) {
@@ -42,12 +92,16 @@ export function AuthProvider({ children }) {
         setUser(response.user);
         return response;
       },
+      updateUser(partialUser) {
+        setUser((currentUser) => (currentUser ? { ...currentUser, ...partialUser } : currentUser));
+      },
       logout() {
         setToken(null);
         setUser(null);
+        setAuthChecking(false);
       }
     }),
-    [token, user]
+    [authChecking, token, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
