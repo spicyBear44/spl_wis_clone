@@ -1,5 +1,20 @@
+const dns = require("dns");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+
+const DEFAULT_MONGODB_DNS_SERVERS = ["1.1.1.1", "8.8.8.8"];
+
+function configureMongoSrvDns(uri) {
+  if (!uri.startsWith("mongodb+srv://")) return;
+
+  const configuredServers = process.env.MONGODB_DNS_SERVERS
+    ? process.env.MONGODB_DNS_SERVERS.split(",").map((server) => server.trim()).filter(Boolean)
+    : DEFAULT_MONGODB_DNS_SERVERS;
+
+  if (configuredServers.length) {
+    dns.setServers(configuredServers);
+  }
+}
 
 function isCurrentEmailIndex(index) {
   return (
@@ -37,6 +52,7 @@ async function connectDatabase() {
   }
 
   mongoose.set("strictQuery", true);
+  configureMongoSrvDns(uri);
   await mongoose.connect(uri);
   await ensureEmailIndex();
 }

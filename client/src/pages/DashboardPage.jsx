@@ -4,9 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import { AddExpenseForm, CreateGroupForm, SettlementForm } from "../components/GroupForms";
 import GroupList from "../components/GroupList";
 import SummaryCards from "../components/SummaryCards";
-import { dashboardApi, groupApi, noteApi, userApi } from "../services/api";
+import { API_ORIGIN, dashboardApi, groupApi, noteApi, userApi } from "../services/api";
 
-const socket = io("http://localhost:5001", { autoConnect: false });
+const socket = API_ORIGIN ? io(API_ORIGIN, { autoConnect: false }) : io({ autoConnect: false });
 
 const sidebarItems = [
   { id: "main", label: "Home", icon: "home" },

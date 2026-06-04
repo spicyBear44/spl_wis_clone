@@ -1,7 +1,21 @@
 import axios from "axios";
 
+const defaultApiUrl = import.meta.env.DEV ? "http://localhost:5001" : "";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim() || defaultApiUrl;
+
+function withoutTrailingSlash(value) {
+  return value.replace(/\/$/, "");
+}
+
+function withoutApiSuffix(value) {
+  return value.replace(/\/api\/?$/, "");
+}
+
+export const API_ORIGIN = configuredApiUrl ? withoutApiSuffix(withoutTrailingSlash(configuredApiUrl)) : "";
+export const API_BASE_URL = API_ORIGIN ? `${API_ORIGIN}/api` : "/api";
+
 const api = axios.create({
-  baseURL: "http://localhost:5001/api"
+  baseURL: API_BASE_URL
 });
 
 api.interceptors.request.use((config) => {

@@ -1,4 +1,6 @@
 const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -47,6 +49,20 @@ app.use("/api/users", requireAuth, userRoutes);
 app.use("/api/dashboard", requireAuth, dashboardRoutes);
 app.use("/api/groups", requireAuth, groupRoutes);
 app.use("/api/notes", requireAuth, noteRoutes);
+
+const clientDistPath = path.join(__dirname, "../../client/dist");
+const clientIndexPath = path.join(clientDistPath, "index.html");
+
+app.use(express.static(clientDistPath));
+
+app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
+  if (fs.existsSync(clientIndexPath)) {
+    res.sendFile(clientIndexPath);
+    return;
+  }
+
+  res.status(500).send(`Client build not found at ${clientIndexPath}. Run the client build before starting the server.`);
+});
 
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
