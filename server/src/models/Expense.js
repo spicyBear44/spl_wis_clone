@@ -11,6 +11,11 @@ const splitSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0
+    },
+    itemAmount: {
+      type: Number,
+      default: 0,
+      min: 0
     }
   },
   { _id: false }

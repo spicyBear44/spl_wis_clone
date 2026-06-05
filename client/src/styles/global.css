@@ -1233,6 +1233,11 @@ button:not(:disabled):active,
   min-height: 0;
 }
 
+.group-overview-list-card,
+.activity-list-panel {
+  min-height: 0;
+}
+
 .friends-grid {
   grid-template-columns: 1.7fr 0.9fr;
   align-items: start;
@@ -1249,6 +1254,76 @@ button:not(:disabled):active,
 .friends-search-results {
   display: grid;
   gap: 1rem;
+}
+
+.group-overview-list-card > .panel {
+  display: grid;
+  min-height: 0;
+}
+
+.group-overview-list-card > .panel > .stack-list,
+.activity-scroll-list {
+  max-height: min(520px, 58vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.25rem;
+  scrollbar-color: rgba(47, 127, 60, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+.activity-scroll-list {
+  max-height: min(460px, 56vh);
+}
+
+.group-overview-list-card > .panel > .stack-list::-webkit-scrollbar,
+.activity-scroll-list::-webkit-scrollbar {
+  width: 0.45rem;
+}
+
+.group-overview-list-card > .panel > .stack-list::-webkit-scrollbar-track,
+.activity-scroll-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.group-overview-list-card > .panel > .stack-list::-webkit-scrollbar-thumb,
+.activity-scroll-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(47, 127, 60, 0.28);
+}
+
+.group-overview-helper {
+  min-height: 150px;
+  margin-top: -100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px dashed rgba(47, 127, 60, 0.22);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(242, 247, 239, 0.62), rgba(255, 255, 255, 0.86));
+  color: var(--text);
+}
+
+.group-overview-helper div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.group-overview-helper strong,
+.group-overview-helper p {
+  margin: 0;
+}
+
+.group-overview-helper p {
+  max-width: 38rem;
+  color: var(--muted);
+}
+
+.group-overview-helper .ghost-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .panel {
@@ -2159,6 +2234,7 @@ button:not(:disabled):active,
 
 .bill-summary-card,
 .payer-row,
+.payment-summary-row,
 .spend-card,
 .bill-row {
   background: rgba(242, 247, 239, 0.82);
@@ -2200,12 +2276,14 @@ button:not(:disabled):active,
 }
 
 .payer-list,
+.payment-summary-list,
 .bill-list {
   display: grid;
   gap: 0.75rem;
 }
 
 .payer-row,
+.payment-summary-row,
 .bill-row {
   display: flex;
   align-items: center;
@@ -2215,11 +2293,63 @@ button:not(:disabled):active,
 }
 
 .payer-row div,
+.payment-summary-row div,
 .bill-row div,
 .spend-card div {
   display: grid;
   gap: 0.2rem;
   min-width: 0;
+}
+
+.payment-summary-section {
+  padding: 1rem;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(240, 249, 236, 0.86), rgba(255, 255, 255, 0.94));
+  box-shadow: inset 0 0 0 1px rgba(67, 122, 62, 0.08);
+}
+
+.payment-summary-row {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.payment-summary-row p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.full-split-details {
+  padding: 0.9rem 1rem;
+  border-radius: 20px;
+  background: rgba(242, 247, 239, 0.52);
+  box-shadow: inset 0 0 0 1px rgba(67, 122, 62, 0.07);
+}
+
+.full-split-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.full-split-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.full-split-details summary span {
+  font-weight: 800;
+}
+
+.full-split-details summary em {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.full-split-details[open] summary {
+  margin-bottom: 0.85rem;
 }
 
 .payer-row em,
@@ -2929,6 +3059,17 @@ button:not(:disabled):active,
 
   .app-content {
     padding: 1rem;
+  }
+
+  .group-overview-list-card > .panel > .stack-list,
+  .activity-scroll-list {
+    max-height: min(420px, 52vh);
+  }
+
+  .group-overview-helper {
+    min-height: 150px;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .groups-sidebar-layout,

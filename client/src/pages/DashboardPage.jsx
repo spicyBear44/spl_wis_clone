@@ -609,7 +609,7 @@ export default function DashboardPage() {
           </article>
         </div>
 
-        <div className="atlas-section-card">
+        <div className="atlas-section-card group-overview-list-card">
           <GroupList
             groups={dashboard.groups}
             selectedGroupId={selectedGroupId}
@@ -621,6 +621,24 @@ export default function DashboardPage() {
             onDeleteGroup={handleDeleteGroup}
             onUpdateExpense={handleUpdateExpense}
           />
+          {dashboard.groups.length ? (
+            <aside className="group-overview-helper">
+              <div>
+                <strong>Need to see who owes what?</strong>
+                <p>Select a group, then open Settle Up to view balances and settlement suggestions.</p>
+              </div>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={() => {
+                  setActiveTab("settle");
+                  setActiveSettlePanel("balances");
+                }}
+              >
+                Open balances
+              </button>
+            </aside>
+          ) : null}
         </div>
       </section>
     );
@@ -846,9 +864,9 @@ export default function DashboardPage() {
         </div>
 
         <section className="activity-grid">
-          <section className="panel">
+          <section className="panel activity-list-panel">
             <h3>Latest expenses</h3>
-            <div className="stack-list">
+            <div className="stack-list activity-scroll-list">
               {dashboard.recentExpenses.map((expense) => (
                 <div className="activity-row" key={expense._id}>
                   <div>
@@ -866,9 +884,9 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="panel">
+          <section className="panel activity-list-panel">
             <h3>Latest settlements</h3>
-            <div className="stack-list">
+            <div className="stack-list activity-scroll-list">
               {dashboard.recentSettlements.map((settlement) => (
                 <div className="activity-row" key={settlement._id}>
                   <div>

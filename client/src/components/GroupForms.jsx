@@ -1,18 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { buildExactSplitsWithProportionalTax, splitEqually } from "../utils/splitCalculations";
 
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
-}
-
-function splitEqually(totalAmount, memberIds) {
-  const totalCents = Math.round(totalAmount * 100);
-  const baseCents = Math.floor(totalCents / memberIds.length);
-  const remainder = totalCents - baseCents * memberIds.length;
-
-  return memberIds.map((memberId, index) => ({
-    user: memberId,
-    amount: Number(((baseCents + (index < remainder ? 1 : 0)) / 100).toFixed(2))
-  }));
 }
 
 function initials(name = "") {
@@ -245,7 +235,7 @@ export function AddExpenseForm({ groups, selectedGroupId, currentUser, onSelectG
     });
   }
 
-  function buildSplits(totalAmount) {
+  function buildSplits(totalAmount, menuAmount, taxAmount, tipAmount) {
     if (!form.participantIds.length) {
       throw new Error("Select at least one participant.");
     }
@@ -254,20 +244,13 @@ export function AddExpenseForm({ groups, selectedGroupId, currentUser, onSelectG
       return splitEqually(totalAmount, form.participantIds);
     }
 
-    const splits = form.participantIds.map((userId) => ({
-      user: userId,
-      amount: Number(form.exactShares[userId] || 0)
-    }));
-    const exactTotal = splits.reduce((sum, split) => sum + split.amount, 0);
-
-    if (splits.some((split) => split.amount < 0)) {
-      throw new Error("Exact split amounts cannot be negative.");
-    }
-    if (Math.abs(exactTotal - totalAmount) > 0.01) {
-      throw new Error("Exact split amounts must add up to the total.");
-    }
-
-    return splits.map((split) => ({ ...split, amount: Number(split.amount.toFixed(2)) }));
+    return buildExactSplitsWithProportionalTax({
+      subtotalAmount: menuAmount,
+      taxAmount,
+      tipAmount,
+      memberIds: form.participantIds,
+      exactShares: form.exactShares
+    });
   }
 
   async function handleSubmit(event) {
@@ -297,7 +280,7 @@ export function AddExpenseForm({ groups, selectedGroupId, currentUser, onSelectG
     try {
       setSaving(true);
       setError("");
-      const splits = buildSplits(totalAmount);
+      const splits = buildSplits(totalAmount, menuAmount, taxAmount, tipAmount);
       await onAddExpense(selectedGroup._id, {
         description: `${selectedGroup.name} expense`,
         amount: Number(totalAmount.toFixed(2)),
@@ -433,7 +416,7 @@ export function AddExpenseForm({ groups, selectedGroupId, currentUser, onSelectG
 
         {form.splitType === "exact" ? (
           <div className="participant-list">
-            <span>Exact amount each person spent</span>
+            <span>Exact item subtotal before tax/tip</span>
             {members
               .filter((member) => form.participantIds.includes(member.user._id))
               .map((member) => (
@@ -454,6 +437,7 @@ export function AddExpenseForm({ groups, selectedGroupId, currentUser, onSelectG
                   />
                 </label>
               ))}
+            <p className="empty-copy">Tax is split by item subtotal. Tip is split equally.</p>
           </div>
         ) : (
           <p className="empty-copy">

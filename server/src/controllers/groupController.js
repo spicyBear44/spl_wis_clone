@@ -77,8 +77,12 @@ function buildSafeSettlementSuggestions(group) {
   return buildSettlementSuggestions(group).filter((suggestion) => suggestion.from && suggestion.to);
 }
 
+function toCents(value) {
+  return Math.round(Number(value || 0) * 100);
+}
+
 function validateExpensePayload(group, payload) {
-  const { description, amount, paidBy, splits } = payload;
+  const { description, amount, paidBy, splits, splitType, menuAmount } = payload;
 
   if (!description || !amount || !paidBy || !Array.isArray(splits) || !splits.length) {
     return { error: "Description, amount, payer, and splits are required." };
@@ -95,7 +99,15 @@ function validateExpensePayload(group, payload) {
 
   const invalidSplit = splits.some((split) => {
     const splitAmount = Number(split.amount);
-    return !split.user || !isGroupMember(group, split.user) || !Number.isFinite(splitAmount) || splitAmount < 0;
+    const itemAmount = split.itemAmount === undefined ? 0 : Number(split.itemAmount);
+    return (
+      !split.user ||
+      !isGroupMember(group, split.user) ||
+      !Number.isFinite(splitAmount) ||
+      splitAmount < 0 ||
+      !Number.isFinite(itemAmount) ||
+      itemAmount < 0
+    );
   });
   if (invalidSplit) {
     return { error: "Splits must use group members and non-negative amounts." };
@@ -104,6 +116,17 @@ function validateExpensePayload(group, payload) {
   const splitTotal = splits.reduce((sum, split) => sum + Number(split.amount || 0), 0);
   if (Math.abs(expenseAmount - splitTotal) > 0.01) {
     return { error: "Split amounts must equal the expense amount." };
+  }
+
+  if (splitType === "exact") {
+    const itemSubtotalCents = splits.reduce((sum, split) => sum + toCents(split.itemAmount), 0);
+    const menuAmountCents = toCents(menuAmount);
+
+    // Exact split itemAmount is the pre-tax subtotal. Tax/tip are included in amount,
+    // but itemAmount must still add up to the original bill subtotal.
+    if (itemSubtotalCents !== menuAmountCents) {
+      return { error: "Exact item amounts must equal the subtotal before tax and tip." };
+    }
   }
 
   return { expenseAmount };
@@ -202,6 +225,7 @@ async function createExpense(req, res) {
       paidBy,
       splits: splits.map((split) => ({
         user: split.user,
+        itemAmount: Number(Number(split.itemAmount || 0).toFixed(2)),
         amount: Number(Number(split.amount).toFixed(2))
       })),
       category: category || "General",
@@ -247,6 +271,7 @@ async function updateExpense(req, res) {
     expense.paidBy = paidBy;
     expense.splits = splits.map((split) => ({
       user: split.user,
+      itemAmount: Number(Number(split.itemAmount || 0).toFixed(2)),
       amount: Number(Number(split.amount).toFixed(2))
     }));
     expense.category = category || "General";

@@ -1,8 +1,46 @@
+import { useState } from "react";
+
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
+function buildSettlementRowsFromBalances(members = []) {
+  const creditors = [];
+  const debtors = [];
+
+  members.forEach((member) => {
+    const balance = Number(member.balance || 0);
+    if (balance > 0.009) {
+      creditors.push({ user: member.user, amount: Number(balance.toFixed(2)) });
+    } else if (balance < -0.009) {
+      debtors.push({ user: member.user, amount: Number(Math.abs(balance).toFixed(2)) });
+    }
+  });
+
+  const rows = [];
+  let creditorIndex = 0;
+  let debtorIndex = 0;
+
+  while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
+    const creditor = creditors[creditorIndex];
+    const debtor = debtors[debtorIndex];
+    const amount = Number(Math.min(creditor.amount, debtor.amount).toFixed(2));
+
+    rows.push({ from: debtor.user, to: creditor.user, amount });
+
+    creditor.amount = Number((creditor.amount - amount).toFixed(2));
+    debtor.amount = Number((debtor.amount - amount).toFixed(2));
+
+    if (creditor.amount <= 0.009) creditorIndex += 1;
+    if (debtor.amount <= 0.009) debtorIndex += 1;
+  }
+
+  return rows;
+}
+
 export default function GroupDetails({ details, currentUser }) {
+  const [fullSplitOpen, setFullSplitOpen] = useState(false);
+
   if (!details) {
     return (
       <section className="panel">
@@ -17,6 +55,7 @@ export default function GroupDetails({ details, currentUser }) {
   const totalBill = expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
   const paidTotals = new Map();
   const spentTotals = new Map();
+  const paymentSummaryRows = suggestions.length ? suggestions : buildSettlementRowsFromBalances(group.members);
 
   expenses.forEach((expense) => {
     const payerId = expense.paidBy?._id;
@@ -37,11 +76,11 @@ export default function GroupDetails({ details, currentUser }) {
     return person._id === currentUser?.id ? "you" : person.name;
   }
 
-  function balanceLabel(suggestion) {
-    if (suggestion.from._id === currentUser?.id) {
-      return `You owe ${suggestion.to.name}`;
+  function paymentSummaryLabel(row) {
+    if (row.from?._id === currentUser?.id) {
+      return `You owe ${row.to?.name || "someone"} ${money(row.amount)}`;
     }
-    return `${suggestion.from.name} owes ${displayName(suggestion.to)}`;
+    return `${row.from?.name || "Someone"} owes ${displayName(row.to)} ${money(row.amount)}`;
   }
 
   return (
@@ -74,6 +113,27 @@ export default function GroupDetails({ details, currentUser }) {
         </article>
       </div>
 
+      <div className="breakdown-section payment-summary-section">
+        <div className="breakdown-heading">
+          <h4>Payment summary</h4>
+          <p>What each person should pay to settle the group.</p>
+        </div>
+        <div className="payment-summary-list">
+          {paymentSummaryRows.map((row, index) => (
+            <article className="payment-summary-row" key={`${row.from?._id}-${row.to?._id}-${index}`}>
+              <div>
+                <strong>
+                  {paymentSummaryLabel(row)}
+                </strong>
+                <p>{money(row.amount)} remaining</p>
+              </div>
+              <span className="status-pill unsettled">Pay</span>
+            </article>
+          ))}
+          {!paymentSummaryRows.length ? <p className="empty-copy">Everyone is square right now.</p> : null}
+        </div>
+      </div>
+
       <div className="breakdown-section">
         <div className="breakdown-heading">
           <h4>Who paid</h4>
@@ -95,33 +155,37 @@ export default function GroupDetails({ details, currentUser }) {
         </div>
       </div>
 
-      <div className="breakdown-section">
-        <div className="breakdown-heading">
-          <h4>What everyone spent</h4>
-          <p>Each person's share from the saved bill splits.</p>
-        </div>
+      <details
+        className="breakdown-section full-split-details"
+        open={fullSplitOpen}
+        onToggle={(event) => setFullSplitOpen(event.currentTarget.open)}
+      >
+        <summary>
+          <span>Full split details</span>
+          <em>{fullSplitOpen ? "Hide shares" : "Show shares"}</em>
+        </summary>
         <div className="spend-grid">
           {group.members.map((member) => {
             const spentAmount = spentTotals.get(member.user._id) || 0;
             return (
               <article className="spend-card" key={member.user._id}>
                 <div>
-                  <strong>{displayName(member.user)}</strong>
+                  <strong>{displayName(member.user)}'s share</strong>
                   <span>@{member.user.username}</span>
                 </div>
                 <div>
-                  <span>Spent</span>
+                  <span>Actual share</span>
                   <em>{money(spentAmount)}</em>
                 </div>
                 <div>
-                  <span>Balance</span>
+                  <span>Net balance</span>
                   <em className={member.balance >= 0 ? "positive" : "negative"}>{money(member.balance)}</em>
                 </div>
               </article>
             );
           })}
         </div>
-      </div>
+      </details>
 
       <div className="breakdown-section">
         <div className="breakdown-heading">
@@ -146,43 +210,22 @@ export default function GroupDetails({ details, currentUser }) {
         </div>
       </div>
 
-      <div className="breakdown-section two-column-breakdown">
-        <div>
-          <div className="breakdown-heading">
-            <h4>What needs settling</h4>
-            <p>Simple payments to square the group.</p>
-          </div>
-          <div className="stack-list">
-            {suggestions.map((suggestion, index) => (
-              <div className="activity-row balance-row" key={`${suggestion.from._id}-${suggestion.to._id}-${index}`}>
-                <div>
-                  <strong>{balanceLabel(suggestion)}</strong>
-                  <p>{money(suggestion.amount)} remaining</p>
-                </div>
-                <span className="status-pill unsettled">Unsettled</span>
-              </div>
-            ))}
-            {!suggestions.length ? <p className="empty-copy">Everyone is square right now.</p> : null}
-          </div>
+      <div className="breakdown-section">
+        <div className="breakdown-heading">
+          <h4>Settlements</h4>
+          <p>Payments already recorded.</p>
         </div>
-
-        <div>
-          <div className="breakdown-heading">
-            <h4>Settlements</h4>
-            <p>Payments already recorded.</p>
-          </div>
-          <div className="stack-list">
-            {settlements.slice(0, 6).map((settlement) => (
-              <div className="activity-row" key={settlement._id}>
-                <div>
-                  <strong>{displayName(settlement.fromUser)} paid {displayName(settlement.toUser)}</strong>
-                  <p>{settlement.note || "Marked as settled"}</p>
-                </div>
-                <span>{money(settlement.amount)}</span>
+        <div className="stack-list">
+          {settlements.slice(0, 6).map((settlement) => (
+            <div className="activity-row" key={settlement._id}>
+              <div>
+                <strong>{displayName(settlement.fromUser)} paid {displayName(settlement.toUser)}</strong>
+                <p>{settlement.note || "Marked as settled"}</p>
               </div>
-            ))}
-            {!settlements.length ? <p className="empty-copy">No settlements recorded yet.</p> : null}
-          </div>
+              <span>{money(settlement.amount)}</span>
+            </div>
+          ))}
+          {!settlements.length ? <p className="empty-copy">No settlements recorded yet.</p> : null}
         </div>
       </div>
     </section>
